@@ -21,21 +21,35 @@ raw_data_files = [f for f in listdir(f"{BASE_DIR}/raw-data") if (isfile(join(f"{
 combined_data = None
 
 for filename in raw_data_files:
-    data = pd.read_csv(f"{BASE_DIR}/raw-data/{filename}", sep=csv_seperator)
+    print(filename)
+    data = pd.read_csv(f"{BASE_DIR}/raw-data/{filename}", sep=csv_seperator, error_bad_lines=False)
 
     if (type(combined_data)!=pd.DataFrame):
         combined_data = data
     else:
         combined_data = pd.concat([data, combined_data])
 
+
+# print(combined_data)
+
 for col in combined_data.columns.to_list():
     if col not in include_columns:
         combined_data.drop(col, axis=1, inplace=True)
+
 
 if (rename_col):
     col = {}
     for i in range(0,len(rename_columns)):
         col[include_columns[i]] = rename_columns[i]
     combined_data.rename(columns=col, inplace=True, errors='raise')
+
+# count = 0
+# for index, row in combined_data.iterrows():
+#     if count%2 == 0:
+#         row['name'] = 'Participant'
+#     else:
+#         row['name'] = 'Ellie'
+#     count += 1
+
 
 combined_data.to_csv(f"{BASE_DIR}/combined.csv", index=None, header=True)
